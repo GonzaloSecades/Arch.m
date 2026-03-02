@@ -1,5 +1,5 @@
 import { CheckCircle2, ImageIcon, UploadIcon } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router';
 import {
   PROGRESS_INCREMENT,
@@ -15,25 +15,60 @@ const Upload = ({ onComplete }: UploadProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [progress, setProgress] = useState(0);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
+  const completeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isMountedRef = useRef(true);
 
   const { isSignedIn } = useOutletContext<AuthContext>();
+
+  const clearTimers = useCallback(() => {
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+
+    if (completeTimeoutRef.current) {
+      clearTimeout(completeTimeoutRef.current);
+      completeTimeoutRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+      clearTimers();
+    };
+  }, [clearTimers]);
 
   const processFile = useCallback(
     (selectedFile: File) => {
       if (!isSignedIn) return;
+      clearTimers();
       setFile(selectedFile);
       setProgress(0);
 
       const reader = new FileReader();
+      reader.onerror = (e) => {
+        if (!isMountedRef.current) return;
+        setFile(null);
+        setProgress(0);
+        console.error('Error reading file', e);
+      };
       reader.onloadend = () => {
+        if (!isMountedRef.current) return;
         const base64 = reader.result as string;
 
-        const interval = setInterval(() => {
+        progressIntervalRef.current = setInterval(() => {
           setProgress((prev) => {
             const next = prev + PROGRESS_INCREMENT;
             if (next >= 100) {
-              clearInterval(interval);
-              setTimeout(() => onComplete(base64), REDIRECT_DELAY_MS);
+              clearTimers();
+              completeTimeoutRef.current = setTimeout(() => {
+                if (!isMountedRef.current) return;
+                onComplete(base64);
+              }, REDIRECT_DELAY_MS);
               return 100;
             }
             return next;
@@ -43,7 +78,7 @@ const Upload = ({ onComplete }: UploadProps) => {
 
       reader.readAsDataURL(selectedFile);
     },
-    [isSignedIn, onComplete]
+    [clearTimers, isSignedIn, onComplete]
   );
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -63,7 +98,8 @@ const Upload = ({ onComplete }: UploadProps) => {
     if (!isSignedIn) return;
 
     const droppedFile = e.dataTransfer.files[0];
-    if (droppedFile) {
+    const allowedFileTypes = ['image/jpeg', 'image/png'];
+    if (droppedFile && allowedFileTypes.includes(droppedFile.type)) {
       processFile(droppedFile);
     }
   };
