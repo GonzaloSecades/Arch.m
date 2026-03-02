@@ -10,7 +10,7 @@ function Navbar() {
       try {
         await signOut();
       } catch (error) {
-        console.log(`Puter sign out failed:${error}`);
+        console.log(`Puter sign out failed: ${error}`);
       }
       return;
     }
@@ -18,7 +18,7 @@ function Navbar() {
     try {
       await signIn();
     } catch (error) {
-      console.log(`Puter sign in error :${error}`);
+      console.log(`Puter sign in error : ${error}`);
     }
   };
   return (
@@ -40,7 +40,7 @@ function Navbar() {
           {isSignedIn ? (
             <>
               <span className="greeting">
-                {userName ? `${userName} ` : 'Signed in'}
+                {userName ? `${userName}` : 'Signed in'}
               </span>
               <Button size="sm" onClick={handleAuthClick} className="btn">
                 Log Out

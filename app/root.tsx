@@ -7,7 +7,7 @@ import {
   ScrollRestoration,
 } from 'react-router';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   getCurrentUser,
   signIn as puterSignIn,
@@ -56,7 +56,7 @@ const DEFAULT_AUTH_STATE: AuthState = {
 export default function App() {
   const [authState, setAuthState] = useState<AuthState>(DEFAULT_AUTH_STATE);
 
-  const refreshAuth = async () => {
+  const refreshAuth = useCallback(async () => {
     try {
       const user = await getCurrentUser();
       setAuthState({
@@ -70,19 +70,29 @@ export default function App() {
       setAuthState(DEFAULT_AUTH_STATE);
       return false;
     }
-  };
+  }, []);
 
   useEffect(() => {
     refreshAuth();
-  }, []);
+  }, [refreshAuth]);
 
   const signIn = async () => {
-    await puterSignIn();
+    try {
+      await puterSignIn();
+    } catch (error) {
+      console.log(`Puter sign in error: ${error}`);
+      throw error;
+    }
     return await refreshAuth();
   };
 
   const signOut = async () => {
-    await puterSignOut();
+    try {
+      await puterSignOut();
+    } catch (error) {
+      console.log(`Puter sign out failed: ${error}`);
+      throw error;
+    }
     return await refreshAuth();
   };
   return (
