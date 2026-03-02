@@ -75,7 +75,7 @@ export default function Home() {
                   <h3>Project Test</h3>
                   <div className="meta">
                     <Clock size={12} />
-                    <span>{new Date('02.03.2026').toLocaleDateString()}</span>
+                    <span>{new Date('02-03-2026').toLocaleDateString()}</span>
                     <span>By GS</span>
                   </div>
                 </div>
