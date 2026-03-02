@@ -40,7 +40,7 @@ function Navbar() {
           {isSignedIn ? (
             <>
               <span className="greeting">
-                {userName ? `${userName}` : 'Signed in'}
+                {userName ? userName : 'Signed in'}
               </span>
               <Button size="sm" onClick={handleAuthClick} className="btn">
                 Log Out

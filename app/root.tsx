@@ -76,7 +76,7 @@ export default function App() {
     refreshAuth();
   }, [refreshAuth]);
 
-  const signIn = async () => {
+  const signIn = useCallback(async () => {
     try {
       await puterSignIn();
     } catch (error) {
@@ -84,9 +84,9 @@ export default function App() {
       throw error;
     }
     return await refreshAuth();
-  };
+  }, [refreshAuth]);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       await puterSignOut();
     } catch (error) {
@@ -94,7 +94,7 @@ export default function App() {
       throw error;
     }
     return await refreshAuth();
-  };
+  }, [refreshAuth]);
   return (
     <main className="bg-background text-foreground relative z-10 min-h-screen">
       <Outlet
