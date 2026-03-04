@@ -4,7 +4,7 @@ export const PUTER_WORKER_URL = import.meta.env.VITE_PUTER_WORKER_URL || '';
 export const STORAGE_PATHS = {
   ROOT: 'archy',
   SOURCES: 'archy/sources',
-  RENDERS: 'archyy/renders',
+  RENDERS: 'archy/renders',
 } as const;
 
 // Timing Constants (in milliseconds)
